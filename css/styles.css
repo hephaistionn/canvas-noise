@@ -2,7 +2,7 @@ body {
 	background-color: black;
 }
 
-#canvas {
+canvas {
 	position: absolute;
 	left: 0px;
 	width: 1000px;
