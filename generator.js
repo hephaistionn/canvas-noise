@@ -1,4 +1,4 @@
-// randomness
+
 let _seed = 1010;
 function random() {
 	_seed ^= _seed << 13;
@@ -7,7 +7,6 @@ function random() {
 	_seed = (_seed < 0) ? ~_seed + 1 : _seed;
 	return _seed / 2147483647;
 }
-
 
 function generatePermutationTable(size) {
 	perm = [];
@@ -204,16 +203,7 @@ const noiseFunctions = {
 		}
 	},
 	perlin_improved: {
-		grad: [
-			[1, 1],
-			[-1, 1],
-			[1, -1],
-			[-1, -1],
-			[1, 0],
-			[-1, 0],
-			[0, 1],
-			[0, -1]
-		],
+		grad: [[1, 1],[-1, 1],[1, -1],[-1, -1],[1, 0],[-1, 0],[0, 1],[0, -1]],
 		init: function () { },
 		noise: function (x, y, size, permMod8, smooth) {
 			let bx0, bx1, by0, by1, b00, b01, b10, b11, rx0, rx1, ry0, ry1, sx, sy, a, b, t, u, v, i, j;
@@ -248,7 +238,6 @@ const noiseFunctions = {
 	}
 };
 
-
 function noiseGenerator(arraySize, scale, size, octaves, lacunarity, persistence, seed, smoothFunctionsName, noiseFunctionsName, octaveFunctionName) {
 	_seed = seed;
 	const canvas = document.createElement('canvas');
@@ -260,13 +249,13 @@ function noiseGenerator(arraySize, scale, size, octaves, lacunarity, persistence
 	const octaveFunction = octaveFunctions[octaveFunctionName] || null;
 	const relativeScale = Math.pow(imageData.width, -scale / 100);
 	const smooth = smoothingFunctions[smoothFunctionsName] || smoothingFunctions.none;
-
 	const values = [];
-	let min = 100;
-	let max = -100;
+
 
 	const permMod8 = generatePermutationTable(size);
+
 	noiseFunction.init(size);
+
 	for (let y = 0; y < imageData.height; y++) {
 		values[y] = [];
 		for (let x = 0; x < imageData.width; x++) {
@@ -278,9 +267,9 @@ function noiseGenerator(arraySize, scale, size, octaves, lacunarity, persistence
 			let amplitude = 1;
 			let frequency = 1;
 
-			for (let o = 0; o < octaves; o++) {
+			for (let i = 0; i < octaves; i++) {
 				let octave = noiseFunction.noise(scaledX * frequency, scaledY * frequency, size, permMod8, smooth);
-				if (octaveFunction) octave = octaveFunction(octave, scaledX, scaledY, o + 1);
+				if (octaveFunction) octave = octaveFunction(octave, scaledX, scaledY, i + 1);
 				octave *= amplitude;
 				noise += octave;
 				frequency *= lacunarity;
@@ -288,45 +277,10 @@ function noiseGenerator(arraySize, scale, size, octaves, lacunarity, persistence
 			}
 
 			values[y][x] = noise;
-			min = Math.min(min, noise);
-			max = Math.max(max, noise);
 		}
 	}
-
-	////////////////////////OPTIONAL DRAWING/////////////////////////////
-	const noiseSpan = max - min;
-	for (let y = 0; y < imageData.height; y++) {
-		for (let x = 0; x < imageData.width; x++) {
-			values[y][x] = (values[y][x] - min) / noiseSpan;
-			const pixelIndex = (y * imageData.width * 4) + x * 4;
-			const color = Math.round(values[y][x] * 255);
-			imageData.data[pixelIndex + 0] = color;
-			imageData.data[pixelIndex + 1] = color;
-			imageData.data[pixelIndex + 2] = color;
-			imageData.data[pixelIndex + 3] = 255;
-		}
-	}
-	context.putImageData(imageData, 0, 0);
-	document.body.appendChild(canvas);
-	//////////////////////////////////////////////////////////////////////
 
 	return values;
 }
 
-window.addEventListener('load', async () => {
-	const arraySize = 500;
-	const scale = 70;
-	const size = 41;
-	const octaves = 1;
-	const lacunarity = 2;
-	const persistence = 0.19;
-	const octaveFunction = null;
-	const noiseFunction = 'perlin_classic'; //perlin_classic perlin_improved simplex value
-	const smoothFunction = 'cosine'; //none cosine
-	const seed = 1445454;
-
-	const values = noiseGenerator(arraySize, scale, size, octaves, lacunarity, persistence, seed, smoothFunction, noiseFunction, octaveFunction);
-
-	console.log(values);
-});
-
+module.exports = noiseGenerator;
